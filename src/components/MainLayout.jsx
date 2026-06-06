@@ -4,7 +4,7 @@ import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import { Outlet } from 'react-router-dom';
 
-const drawerWidth = 240;
+const drawerWidth = 260;
 
 const MainLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);

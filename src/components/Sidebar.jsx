@@ -1,24 +1,29 @@
 import React from 'react';
-import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Box, Divider } from '@mui/material';
+import { 
+  Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, 
+  Toolbar, Box, Divider, Typography, Avatar 
+} from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
-import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
-import CelebrationIcon from '@mui/icons-material/Celebration';
-import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
-import ReceiptIcon from '@mui/icons-material/Receipt';
+import HomeWorkIcon from '@mui/icons-material/HomeWork';
+import ChurchIcon from '@mui/icons-material/Church';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import EventIcon from '@mui/icons-material/Event';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const drawerWidth = 240;
+const drawerWidth = 260;
 
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
   { text: 'Members', icon: <PeopleIcon />, path: '/members' },
-  { text: 'Monthly Subscription', icon: <CurrencyRupeeIcon />, path: '/subscription' },
-  { text: 'Festival Tax', icon: <CelebrationIcon />, path: '/festival-tax' },
-  { text: 'Donations', icon: <VolunteerActivismIcon />, path: '/donations' },
-  { text: 'Expenses', icon: <ReceiptIcon />, path: '/expenses' },
-  { text: 'Loans', icon: <AccountBalanceWalletIcon />, path: '/loans' },
+  { text: 'Families', icon: <HomeWorkIcon />, path: '/families' },
+  { text: 'Sacraments', icon: <ChurchIcon />, path: '/sacraments' },
+  { text: 'Finance Management', icon: <AccountBalanceWalletIcon />, path: '/finance' },
+  { text: 'Events Calendar', icon: <EventIcon />, path: '/events' },
+  { text: 'Reports & Analytics', icon: <AssessmentIcon />, path: '/reports' },
+  { text: 'Administration', icon: <SettingsIcon />, path: '/admin' },
 ];
 
 const Sidebar = ({ mobileOpen, handleDrawerToggle, window }) => {
@@ -33,37 +38,86 @@ const Sidebar = ({ mobileOpen, handleDrawerToggle, window }) => {
   };
 
   const drawer = (
-    <div>
-      <Toolbar />
-      <Divider />
-      <List>
-        {menuItems.map((item) => (
-          <ListItem disablePadding key={item.text}>
-            <ListItemButton 
-              onClick={() => handleNavigation(item.path)}
-              selected={location.pathname === item.path}
-              sx={{
-                '&.Mui-selected': {
-                  bgcolor: 'rgba(79, 70, 229, 0.08)',
-                  borderRight: '4px solid #4f46e5',
-                  '& .MuiListItemIcon-root': {
-                     color: '#4f46e5',
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#FFFFFF' }}>
+      {/* Sidebar Header - Parish Branding */}
+      <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40, border: '2px solid #D4AF37' }}>
+          <ChurchIcon sx={{ color: '#D4AF37' }} />
+        </Avatar>
+        <Box>
+          <Typography variant="subtitle1" fontWeight="bold" color="primary.main" sx={{ lineHeight: 1.2 }}>
+            St. Mary's Cathedral
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Diocese Administration
+          </Typography>
+        </Box>
+      </Box>
+      
+      <Divider sx={{ opacity: 0.6 }} />
+
+      {/* Menu Navigation */}
+      <List sx={{ px: 1.5, py: 2, flexGrow: 1 }}>
+        {menuItems.map((item) => {
+          const isSelected = location.pathname === item.path || 
+            (item.path !== '/' && location.pathname.startsWith(item.path));
+          return (
+            <ListItem disablePadding key={item.text} sx={{ mb: 0.5 }}>
+              <ListItemButton 
+                onClick={() => handleNavigation(item.path)}
+                selected={isSelected}
+                sx={{
+                  borderRadius: '10px',
+                  py: 1.2,
+                  px: 2,
+                  '&.Mui-selected': {
+                    bgcolor: 'rgba(30, 58, 138, 0.08)', // Soft Royal Blue
+                    borderLeft: '4px solid #D4AF37', // Gold highlight
+                    '& .MuiListItemIcon-root': {
+                       color: 'primary.main',
+                    },
+                    '& .MuiListItemText-primary': {
+                      fontWeight: 700,
+                      color: 'primary.main',
+                    }
+                  },
+                  '&:hover': {
+                    bgcolor: 'rgba(30, 58, 138, 0.03)',
+                    borderRadius: '10px',
                   }
-                },
-                '&:hover': {
-                  bgcolor: 'rgba(0, 0, 0, 0.04)',
-                }
-              }}
-            >
-              <ListItemIcon sx={{ color: location.pathname === item.path ? '#4f46e5' : 'inherit' }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} sx={{ fontWeight: location.pathname === item.path ? 'bold' : 'normal' }} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+                }}
+              >
+                <ListItemIcon sx={{ 
+                  minWidth: 40,
+                  color: isSelected ? 'primary.main' : 'text.secondary',
+                  transition: 'color 0.2s'
+                }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText 
+                  primary={item.text} 
+                  primaryTypographyProps={{
+                    fontSize: '0.92rem',
+                    fontWeight: isSelected ? 700 : 500,
+                    color: isSelected ? 'primary.main' : 'text.primary',
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
       </List>
-    </div>
+
+      {/* Footer Branding */}
+      <Box sx={{ p: 2, textAlign: 'center', mt: 'auto' }}>
+        <Typography variant="caption" color="text.secondary" display="block">
+          ChurchOS v2.0
+        </Typography>
+        <Typography variant="caption" sx={{ fontSize: '0.65rem' }} color="text.disabled">
+          Licensed to Archdiocese
+        </Typography>
+      </Box>
+    </Box>
   );
 
   const container = window !== undefined ? () => window().document.body : undefined;
@@ -80,7 +134,7 @@ const Sidebar = ({ mobileOpen, handleDrawerToggle, window }) => {
         open={mobileOpen}
         onClose={handleDrawerToggle}
         ModalProps={{
-          keepMounted: true, // Better open performance on mobile.
+          keepMounted: true,
         }}
         sx={{
           display: { xs: 'block', sm: 'none' },
@@ -93,7 +147,7 @@ const Sidebar = ({ mobileOpen, handleDrawerToggle, window }) => {
         variant="permanent"
         sx={{
           display: { xs: 'none', sm: 'block' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, borderRight: '1px solid rgba(0, 0, 0, 0.12)' },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, borderRight: '1px solid #e2e8f0' },
         }}
         open
       >
