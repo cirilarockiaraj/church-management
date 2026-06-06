@@ -26,7 +26,10 @@ const Dashboard = () => {
     donations: 0,
     totalIncome: 0,
     expenses: 0,
-    netBalance: 0
+    netBalance: 0,
+    loansDisbursed: 0,
+    loansRepaid: 0,
+    loansOutstanding: 0
   });
 
   const [monthlyData, setMonthlyData] = useState([]);
@@ -44,14 +47,31 @@ const Dashboard = () => {
       const donDataRaw = await getSpreadsheetData('Donations!A2:E') || [];
       const expDataRaw = await getSpreadsheetData('Expenses!A2:E') || [];
       
+      let loansRaw = [];
+      let repaymentsRaw = [];
+      try {
+        loansRaw = await getSpreadsheetData('Loans!A2:J') || [];
+      } catch (e) {
+        console.log("Loans sheet not initialized yet", e);
+      }
+      try {
+        repaymentsRaw = await getSpreadsheetData('Loan_Repayments!A2:H') || [];
+      } catch (e) {
+        console.log("Loan repayments sheet not initialized yet", e);
+      }
+      
       let totalSub = 0;
       let totalTax = 0;
       let totalDon = 0;
       let totalExp = 0;
+      let totalLoansDisbursed = 0;
+      let totalLoansRepaid = 0;
+      let totalExpectedReturn = 0;
 
       // Group subs by month for the chart
       const monthlyMap = { Jan:0, Feb:0, Mar:0, Apr:0, May:0, Jun:0, Jul:0, Aug:0, Sep:0, Oct:0, Nov:0, Dec:0 };
       const monthlyExpMap = { Jan:0, Feb:0, Mar:0, Apr:0, May:0, Jun:0, Jul:0, Aug:0, Sep:0, Oct:0, Nov:0, Dec:0 };
+      const monthNames = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
       // Process Subscriptions (Amount is index 5, Month is index 3, Year is index 4, Status is index 6)
       subDataRaw.forEach(row => {
@@ -86,8 +106,6 @@ const Dashboard = () => {
              
              if (year !== 'All' && donYear !== String(year)) return;
              
-             // Simple mapping 01 -> Jan
-             const monthNames = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
              const donMonth = monthNames[parseInt(donMonthNum, 10)];
 
              if (month !== 'All' && donMonth !== month) return;
@@ -104,7 +122,6 @@ const Dashboard = () => {
              
              if (year !== 'All' && expYear !== String(year)) return;
              
-             const monthNames = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
              const expMonth = monthNames[parseInt(expMonthNum, 10)];
 
              if (month !== 'All' && expMonth !== month) return;
@@ -117,6 +134,38 @@ const Dashboard = () => {
           }
       });
 
+      // Process Loans (Principal is index 3, Rate is index 4, Tenure is index 5, Start Year is index 6, Start Month is index 7)
+      loansRaw.forEach(row => {
+          if (row.length >= 8) {
+             if (year !== 'All' && String(row[6]) !== String(year)) return;
+             if (month !== 'All' && row[7] !== month) return;
+
+             const principal = Number(row[3]) || 0;
+             const interestRate = Number(row[4]) || 0;
+             const tenure = Number(row[5]) || 0;
+             const interestAmount = (principal * interestRate * tenure) / 100;
+
+             totalLoansDisbursed += principal;
+             totalExpectedReturn += (principal + interestAmount);
+          }
+      });
+
+      // Process Repayments (Amount Paid is index 4, Date is index 3, Status is index 6)
+      repaymentsRaw.forEach(row => {
+          if (row.length >= 7 && row[6] === 'Success') {
+             const repayYear = row[3] ? String(row[3]).split('-')[0] : '';
+             const repayMonthNum = row[3] ? String(row[3]).split('-')[1] : '';
+             const repayMonth = monthNames[parseInt(repayMonthNum, 10)];
+
+             if (year !== 'All' && repayYear !== String(year)) return;
+             if (month !== 'All' && repayMonth !== month) return;
+
+             totalLoansRepaid += Number(row[4]) || 0;
+          }
+      });
+
+      const totalLoansOutstanding = Math.max(0, totalExpectedReturn - totalLoansRepaid);
+
       // Update State
       const grandTotalIncome = totalSub + totalTax + totalDon;
       setTotals({
@@ -125,7 +174,10 @@ const Dashboard = () => {
         donations: totalDon,
         totalIncome: grandTotalIncome,
         expenses: totalExp,
-        netBalance: grandTotalIncome - totalExp
+        netBalance: grandTotalIncome - totalExp,
+        loansDisbursed: totalLoansDisbursed,
+        loansRepaid: totalLoansRepaid,
+        loansOutstanding: totalLoansOutstanding
       });
 
       // Format for Bar Chart
@@ -205,7 +257,7 @@ const Dashboard = () => {
         <>
           <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <SummaryCard title="Monthly Subscriptions" amount={totals.subscriptions} color="#1976d2" />
+              <SummaryCard title="Monthly Subscriptions" amount={totals.subscriptions} color="#4f46e5" />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <SummaryCard title="Festival Tax" amount={totals.festivalTax} color="#9c27b0" />
@@ -221,6 +273,15 @@ const Dashboard = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <SummaryCard title="Net Balance" amount={totals.netBalance} color={totals.netBalance >= 0 ? "#009688" : "#f44336"} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <SummaryCard title="Total Loans Disbursed" amount={totals.loansDisbursed} color="#6366f1" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <SummaryCard title="Total Loans Repaid" amount={totals.loansRepaid} color="#10b981" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <SummaryCard title="Outstanding Loans" amount={totals.loansOutstanding} color="#ef4444" />
             </Grid>
           </Grid>
 

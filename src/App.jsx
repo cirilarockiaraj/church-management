@@ -14,22 +14,30 @@ import Subscription from './pages/Subscription';
 import FestivalTax from './pages/FestivalTax';
 import Donations from './pages/Donations';
 import Expenses from './pages/Expenses';
+import Loans from './pages/Loans';
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2', // Blue
+      main: '#4f46e5', // Modern Indigo
     },
     secondary: {
-      main: '#9c27b0', // Purple for church app accents
+      main: '#0d9488', // Vibrant Teal
     },
     background: {
-      default: '#f4f6f8',
+      default: '#f8fafc', // Clean light gray-blue background
     },
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Plus Jakarta Sans", "Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h4: {
+      fontWeight: 700,
+      letterSpacing: '-0.02em',
+    },
+    h6: {
+      fontWeight: 600,
+    },
+    button: {
       fontWeight: 600,
     }
   },
@@ -38,14 +46,17 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: 'none',
-          borderRadius: 8,
+          borderRadius: 10,
+          padding: '8px 16px',
         },
       },
     },
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 16,
+          boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.04)',
+          border: '1px solid rgba(241, 245, 249, 0.8)',
         },
       },
     }
@@ -69,6 +80,7 @@ function App() {
                 <Route path="/festival-tax" element={<FestivalTax />} />
                 <Route path="/donations" element={<Donations />} />
                 <Route path="/expenses" element={<Expenses />} />
+                <Route path="/loans" element={<Loans />} />
               </Route>
             </Route>
             

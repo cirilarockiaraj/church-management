@@ -6,6 +6,7 @@ import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import CelebrationIcon from '@mui/icons-material/Celebration';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const drawerWidth = 240;
@@ -17,6 +18,7 @@ const menuItems = [
   { text: 'Festival Tax', icon: <CelebrationIcon />, path: '/festival-tax' },
   { text: 'Donations', icon: <VolunteerActivismIcon />, path: '/donations' },
   { text: 'Expenses', icon: <ReceiptIcon />, path: '/expenses' },
+  { text: 'Loans', icon: <AccountBalanceWalletIcon />, path: '/loans' },
 ];
 
 const Sidebar = ({ mobileOpen, handleDrawerToggle, window }) => {
@@ -42,10 +44,10 @@ const Sidebar = ({ mobileOpen, handleDrawerToggle, window }) => {
               selected={location.pathname === item.path}
               sx={{
                 '&.Mui-selected': {
-                  bgcolor: 'rgba(25, 118, 210, 0.08)',
-                  borderRight: '4px solid #1976d2',
+                  bgcolor: 'rgba(79, 70, 229, 0.08)',
+                  borderRight: '4px solid #4f46e5',
                   '& .MuiListItemIcon-root': {
-                     color: '#1976d2',
+                     color: '#4f46e5',
                   }
                 },
                 '&:hover': {
@@ -53,7 +55,7 @@ const Sidebar = ({ mobileOpen, handleDrawerToggle, window }) => {
                 }
               }}
             >
-              <ListItemIcon sx={{ color: location.pathname === item.path ? '#1976d2' : 'inherit' }}>
+              <ListItemIcon sx={{ color: location.pathname === item.path ? '#4f46e5' : 'inherit' }}>
                 {item.icon}
               </ListItemIcon>
               <ListItemText primary={item.text} sx={{ fontWeight: location.pathname === item.path ? 'bold' : 'normal' }} />

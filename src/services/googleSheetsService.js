@@ -278,3 +278,56 @@ export const deleteSpreadsheetRow = async (sheetName, rowIndex) => {
     throw error;
   }
 };
+
+export const ensureSheetExists = async (sheetName, headerRow) => {
+  try {
+    await initGoogleSheetsAPI();
+    if (!checkIsSignedIn()) {
+        await signInToGoogle();
+    }
+    
+    // Fetch spreadsheet metadata to check sheet existence
+    const response = await gapi.client.sheets.spreadsheets.get({
+      spreadsheetId: SPREADSHEET_ID,
+    });
+    
+    const exists = response.result.sheets.some(s => s.properties.title === sheetName);
+    if (!exists) {
+      // 1. Create the sheet via batchUpdate
+      await gapi.client.sheets.spreadsheets.batchUpdate({
+        spreadsheetId: SPREADSHEET_ID,
+        resource: {
+          requests: [
+            {
+              addSheet: {
+                properties: {
+                  title: sheetName,
+                }
+              }
+            }
+          ]
+        }
+      });
+      
+      // 2. Set the header row values
+      await gapi.client.sheets.spreadsheets.values.update({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${sheetName}!A1`,
+        valueInputOption: 'USER_ENTERED',
+        resource: {
+          values: [headerRow]
+        }
+      });
+    }
+  } catch (error) {
+    if (error.status === 401 || error.status === 403) {
+        localStorage.removeItem(GOOGLE_AUTH_STORAGE_KEY);
+        gapi.client.setToken('');
+        await signInToGoogle();
+        return ensureSheetExists(sheetName, headerRow); // Retry once after sign in
+    }
+    console.error(`Error ensuring sheet ${sheetName} exists:`, error);
+    throw error;
+  }
+};
+
